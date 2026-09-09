@@ -1,0 +1,39 @@
+# ---- API Gateway ----
+# Unico punto de entrada del sistema. El cliente solo conoce el puerto 8080;
+# el gateway se encarga de enrutar cada peticion al microservicio correcto.
+server:
+  port: 8080
+
+spring:
+  application:
+    name: api-gateway
+
+  cloud:
+    gateway:
+      routes:
+        # /api/usuarios/** -> microservicio de Usuarios (8081)
+        - id: ruta-usuarios
+          uri: ${USUARIOS_SERVICE_URL:http://localhost:8081}
+          predicates:
+            - Path=/api/usuarios/**
+
+        # /api/pedidos/** -> microservicio de Pedidos (8082)
+        - id: ruta-pedidos
+          uri: ${PEDIDOS_SERVICE_URL:http://localhost:8082}
+          predicates:
+            - Path=/api/pedidos/**
+
+      httpclient:
+        connect-timeout: 3000
+        response-timeout: 5s
+
+# URLs usadas por el verificador de estado de los servicios
+servicios:
+  usuarios:
+    url: ${USUARIOS_SERVICE_URL:http://localhost:8081}
+  pedidos:
+    url: ${PEDIDOS_SERVICE_URL:http://localhost:8082}
+
+logging:
+  level:
+    org.springframework.cloud.gateway: INFO

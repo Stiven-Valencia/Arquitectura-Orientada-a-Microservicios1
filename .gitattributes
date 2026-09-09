@@ -1,0 +1,19 @@
+# Normaliza los finales de línea: LF en el repositorio, nativos al descargar.
+# Evita que un mismo archivo aparezca como modificado según el sistema operativo.
+* text=auto
+
+# Archivos de código: siempre LF
+*.java   text eol=lf
+*.xml    text eol=lf
+*.yml    text eol=lf
+*.properties text eol=lf
+*.html   text eol=lf
+*.css    text eol=lf
+*.js     text eol=lf
+*.md     text eol=lf
+
+# Binarios: nunca convertir
+*.jar    binary
+*.docx   binary
+*.png    binary
+*.jpg    binary

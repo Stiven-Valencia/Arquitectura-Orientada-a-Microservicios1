@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Arquitectura de Microservicios</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/estilos.css">
+</head>
+<body>
+
+<header class="cabecera">
+    <div class="cabecera__titulo">
+        <h1>Arquitectura Orientada a Microservicios</h1>
+        <p>Panel de control y visualizador de comunicación entre servicios</p>
+    </div>
+    <div class="cabecera__estado" id="estadoGlobal">
+        <span class="punto punto--espera"></span>
+        <span id="estadoGlobalTexto">Comprobando servicios…</span>
+    </div>
+</header>
+
+<main class="panel">
+
+    <!-- ============ VISUALIZADOR DE ARQUITECTURA ============ -->
+    <section class="tarjeta tarjeta--ancha">
+        <div class="tarjeta__cabecera">
+            <h2>Diagrama en vivo</h2>
+            <span class="etiqueta" id="etiquetaFlujo">en reposo</span>
+        </div>
+
+        <div class="diagrama">
+            <svg id="lienzoDiagrama" viewBox="0 0 900 300" preserveAspectRatio="xMidYMid meet">
+                <!-- Conexiones: se dibujan primero para quedar debajo de los nodos -->
+                <g class="conexiones">
+                    <path id="viaNavegadorGateway" class="via" d="M 150 150 L 330 150"/>
+                    <path id="viaGatewayUsuarios" class="via" d="M 470 140 L 750 90"/>
+                    <path id="viaGatewayPedidos" class="via" d="M 470 160 L 750 210"/>
+                    <path id="viaPedidosUsuarios" class="via via--interna" d="M 815 170 L 815 130"/>
+                </g>
+
+                <!-- Partícula que viaja durante una petición -->
+                <circle id="particula" class="particula" r="6" opacity="0"/>
+
+                <!-- Nodo: Navegador -->
+                <g class="nodo" id="nodoNavegador">
+                    <rect x="40" y="110" width="110" height="80" rx="10"/>
+                    <text x="95" y="145" class="nodo__titulo">Navegador</text>
+                    <text x="95" y="166" class="nodo__sub">cliente</text>
+                </g>
+
+                <!-- Nodo: API Gateway -->
+                <g class="nodo nodo--gateway" id="nodoGateway">
+                    <rect x="330" y="105" width="140" height="90" rx="10"/>
+                    <text x="400" y="138" class="nodo__titulo">API Gateway</text>
+                    <text x="400" y="159" class="nodo__sub">puerto 8080</text>
+                    <text x="400" y="178" class="nodo__ruta">enruta /api/**</text>
+                </g>
+
+                <!-- Nodo: Servicio de Usuarios -->
+                <g class="nodo nodo--servicio" id="nodoUsuarios">
+                    <rect x="750" y="50" width="130" height="80" rx="10"/>
+                    <text x="815" y="85" class="nodo__titulo">Usuarios</text>
+                    <text x="815" y="106" class="nodo__sub">puerto 8081</text>
+                    <circle class="nodo__salud" id="saludUsuarios" cx="766" cy="66" r="5"/>
+                </g>
+
+                <!-- Nodo: Servicio de Pedidos -->
+                <g class="nodo nodo--servicio" id="nodoPedidos">
+                    <rect x="750" y="170" width="130" height="80" rx="10"/>
+                    <text x="815" y="205" class="nodo__titulo">Pedidos</text>
+                    <text x="815" y="226" class="nodo__sub">puerto 8082</text>
+                    <circle class="nodo__salud" id="saludPedidos" cx="766" cy="186" r="5"/>
+                </g>
+
+                <text x="828" y="154" class="via__nota">REST</text>
+            </svg>
+        </div>
+
+        <p class="diagrama__pie">
+            La flecha vertical entre <strong>Pedidos</strong> y <strong>Usuarios</strong> es la
+            comunicación entre microservicios: se ilumina cada vez que un pedido necesita
+            validar o consultar un usuario.
+        </p>
+    </section>
+
+    <!-- ============ SERVICIO DE USUARIOS ============ -->
+    <section class="tarjeta">
+        <div class="tarjeta__cabecera">
+            <h2>Servicio de Usuarios</h2>
+            <span class="puerto">:8081</span>
+        </div>
+
+        <form id="formUsuario" class="formulario">
+            <div class="campo">
+                <label for="usuarioNombre">Nombre</label>
+                <input type="text" id="usuarioNombre" placeholder="Ana Martínez" required>
+            </div>
+            <div class="campo">
+                <label for="usuarioCorreo">Correo</label>
+                <input type="email" id="usuarioCorreo" placeholder="ana@ejemplo.com" required>
+            </div>
+            <div class="campo">
+                <label for="usuarioCiudad">Ciudad</label>
+                <input type="text" id="usuarioCiudad" placeholder="Medellín">
+            </div>
+            <button type="submit" class="boton boton--primario">Crear usuario</button>
+        </form>
+
+        <div class="lista" id="listaUsuarios">
+            <p class="lista__vacia">Cargando usuarios…</p>
+        </div>
+    </section>
+
+    <!-- ============ SERVICIO DE PEDIDOS ============ -->
+    <section class="tarjeta">
+        <div class="tarjeta__cabecera">
+            <h2>Servicio de Pedidos</h2>
+            <span class="puerto">:8082</span>
+        </div>
+
+        <form id="formPedido" class="formulario">
+            <div class="campo">
+                <label for="pedidoUsuarioId">Usuario</label>
+                <select id="pedidoUsuarioId" required></select>
+            </div>
+            <div class="campo">
+                <label for="pedidoProducto">Producto</label>
+                <input type="text" id="pedidoProducto" placeholder="Teclado mecánico" required>
+            </div>
+            <div class="campo campo--doble">
+                <div>
+                    <label for="pedidoCantidad">Cantidad</label>
+                    <input type="number" id="pedidoCantidad" value="1" min="1" required>
+                </div>
+                <div>
+                    <label for="pedidoTotal">Total (COP)</label>
+                    <input type="number" id="pedidoTotal" value="250000" min="0" step="1000" required>
+                </div>
+            </div>
+            <button type="submit" class="boton boton--primario">Crear pedido</button>
+        </form>
+
+        <div class="ensayos">
+            <p class="ensayos__titulo">Probar los casos de error</p>
+            <button class="boton boton--fantasma" id="botonUsuarioInexistente">
+                Pedido con usuario id 999 <span class="flecha">→</span> espera 404
+            </button>
+            <button class="boton boton--fantasma" id="botonRecargar">
+                Recargar estado del sistema
+            </button>
+        </div>
+
+        <div class="lista" id="listaPedidos">
+            <p class="lista__vacia">Aún no hay pedidos.</p>
+        </div>
+    </section>
+
+    <!-- ============ CONSOLA DE PETICIONES ============ -->
+    <section class="tarjeta tarjeta--ancha">
+        <div class="tarjeta__cabecera">
+            <h2>Consola de peticiones HTTP</h2>
+            <button class="boton boton--fantasma boton--mini" id="botonLimpiarConsola">Limpiar</button>
+        </div>
+        <div class="consola" id="consola">
+            <p class="consola__vacia">Cada petición que hagas aparecerá aquí con su método, ruta, código de respuesta y latencia.</p>
+        </div>
+    </section>
+
+</main>
+
+<div class="aviso" id="aviso"></div>
+
+<script src="js/app.js"></script>
+</body>
+</html>
